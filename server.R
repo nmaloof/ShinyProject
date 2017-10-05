@@ -1,44 +1,45 @@
-library(ggplot2)
-library(plotly)
-library(dplyr)
-
-source("./helpers.R")
-
 server <- function(input, output, session){
-    #---Connect to the Database and Retreive Data---#
-    conn <- dbConnecter(session, dbname = "./USWildFires.sqlite")
-    FiresData1 <- reactive(dbGetDataState(conn = conn, tblname = "WildFires", state = input$State1))
-    FiresData2 <- reactive(dbGetDataState(conn = conn, tblname = "WildFires", state = input$State2))
+    WildFires <- fread("WildFires.csv")
     
-    
-    #---Codes to make the Graphs and Change State Selected---#
-    output$BarState1 <- renderPlotly({
-        DT <- FiresData1()[,.(Count = .N), by = STAT_CAUSE_DESCR][,.(STAT_CAUSE_DESCR, RelFreq = Count/sum(Count))]
-        plot_ly(data = DT, x = ~STAT_CAUSE_DESCR, y = ~RelFreq, type = 'bar')
+    #-------Generate The First Geographic Map -> A Heat Map -------#
+    output$GeoMap1 <- renderPlotly({
+        if(input$SelectParam == "All" && input$SelectYear == "All"){
+            Fires <- WildFires[, .(TotalFires = .N), by = STATE]
+        }else if(input$SelectParam != "All" & input$SelectYear == "All"){
+            Fires <- WildFires[STAT_CAUSE_DESCR %in% input$SelectParam, .(TotalFires = .N), by = STATE]
+        }else if(input$SelectParam == "All" & input$SelectYear != "All"){
+            Fires <- WildFires[as.character(FIRE_YEAR) %in% input$SelectYear, .(TotalFires = .N), by = STATE]
+        }else{
+            Fires <- WildFires[STAT_CAUSE_DESCR %in% input$SelectParam & as.character(FIRE_YEAR) %in% input$SelectYear, .(TotalFires = .N), by = STATE]
+        }
+        
+        g <- list(
+            scope = 'usa',
+            projection = list(type = 'albers usa'),
+            showlakes = TRUE
+            # bgcolor = "rgba(51,153,255,1)",
+            # paper_bgcolor = '#191A1A'
+        )
+        plot_geo(Fires,locationmode = 'USA-states') %>% 
+            add_trace(z = ~TotalFires, locations = ~STATE, color = ~TotalFires, colors = 'Reds') %>% 
+            colorbar() %>%
+            layout(title = 'Fire Count by Cause and Year', geo = g)
     })
     
-    output$BarState2 <- renderPlotly({
-        DT <- FiresData2()[, .(Count = .N), by = STAT_CAUSE_DESCR][,.(STAT_CAUSE_DESCR, RelFreq = Count/sum(Count))]
-        plot_ly(data = DT, x = ~STAT_CAUSE_DESCR, y = ~RelFreq, type = 'bar')
-    })
-    
-    output$LineState1 <- renderPlotly({
-        DT <- FiresData1()[,.(Count = .N),by = FIRE_YEAR]
-        DT <- DT %>% arrange(., FIRE_YEAR)
-        plot_ly(data = DT, x = ~FIRE_YEAR, y = ~Count, type = 'scatter', mode = 'lines')
-    })
-    
-    output$LineState2 <- renderPlotly({
-        DT <- FiresData2()[,.(Count = .N),by = FIRE_YEAR]
-        DT <- DT %>% arrange(., FIRE_YEAR)
-        plot_ly(data = DT, x = ~FIRE_YEAR, y = ~Count, type = 'scatter', mode = 'lines')
+    #-------Generate The First Geographic Map -> A Heat Map -------#
+    output$GeoMap2 <- renderPlotly({
+        plot_mapbox(data = WildFires[1:10000], lat = ~LATITUDE, lon = ~LONGITUDE, 
+                    split = ~STAT_CAUSE_DESCR, size = 2, mode = "scattermapbox") %>%
+            layout(title = "Locations of Fires")
     })
     
     
     
     
-    observe({
-        print(input$State1)
-    })
     
+    observe(
+        {
+            #print(str(WildFires))
+        }
+    )
 }

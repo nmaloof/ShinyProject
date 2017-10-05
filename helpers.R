@@ -1,8 +1,7 @@
-#-----Connect to the Database-----#
 dbConnecter <- function(session, dbname){
     require(RSQLite)
     conn <- dbConnect(drv = SQLite(), dbname = dbname)
-    #---Disconnect DBase on Session End---#
+    #---Disconnect Database on Session End---#
     session$onSessionEnded(function(){
         dbDisconnect(conn)
     })
@@ -11,7 +10,7 @@ dbConnecter <- function(session, dbname){
     conn
 }
 
-dbGetDataState <- function(conn, tblname, state){
-    query <- paste0("SELECT * FROM ", tblname, " WHERE STATE = '", state, "'")
+dbGetData <- function(conn, tblname){
+    query = paste("SELECT * FROM", tblname)
     as.data.table(dbGetQuery(conn = conn, statement = query))
 }
