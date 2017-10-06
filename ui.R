@@ -47,7 +47,7 @@ ui <- dashboardPage(
                     ),
                     box(
                         width = 12,
-                        plotlyOutput(outputId = "GeoMap1"),
+                        htmlOutput(outputId = "GeoMap1"),
                         background = "red"
                     )
                 )
@@ -57,10 +57,34 @@ ui <- dashboardPage(
                 tabName = "MapTab2",
                 fluidPage(
                     h1("Exact Fire Locations"),
+                    fluidRow(
+                        column(
+                            width = 5,
+                            offset = 1,
+                            selectInput(
+                                inputId = "SelectYear2",
+                                label = "Please Select a Year",
+                                choices = as.character(1992:2015),
+                                selected = "1992"
+                            )
+                        ),
+                        column(
+                            width = 5,
+                            offset = 1,
+                            selectInput(
+                                inputId = "SelectMonth",
+                                label = "Select a Month",
+                                choices = list("January" = 1, "February" = 2,
+                                               "March" = 3, "April" = 4, "May" = 5,
+                                               "June" = 6, "July" = 7, "August" = 8, "September" = 9,
+                                               "October" = 10, "November" = 11, "December" = 12)
+                            )
+                        )
+                    ),
+                    
                     box(
                         width = 12,
-                        plotlyOutput(outputId = "GeoMap2"),
-                        background = "red"
+                        htmlOutput(outputId = "GeoMap2")
                     )
                 )
             ),
