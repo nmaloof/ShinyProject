@@ -4,9 +4,13 @@ ui <- dashboardPage(
         title = "U.S Wild Fires"
     ),
     dashboardSidebar(
+        sidebarUserPanel(
+            name = "Nicholas Maloof",
+            image = "https://media.licdn.com/mpr/mpr/shrinknp_100_100/AAEAAQAAAAAAAAi7AAAAJDNkZmRjZThkLWZhMDMtNDdlMi1hZmYxLThlYWU2NzA5MjU2ZA.jpg"
+        ),
         sidebarMenu(
-            menuItem(text = "Geography", tabName = "MapTab"),
-            menuItem(text = "Locations", tabName = "MapTab2"),
+            menuItem(text = "Geography", tabName = "MapTab", icon = icon("map")),
+            menuItem(text = "Locations", tabName = "MapTab2", icon = icon("map-marker")),
             menuItem(text = "State Level", tabName = "StateTab"),
             menuItem(text = "Temperature", tabName = "TempTab")
         )
@@ -59,7 +63,7 @@ ui <- dashboardPage(
                     h1("Exact Fire Locations"),
                     fluidRow(
                         column(
-                            width = 5,
+                            width = 3,
                             offset = 1,
                             selectInput(
                                 inputId = "SelectYear2",
@@ -69,7 +73,7 @@ ui <- dashboardPage(
                             )
                         ),
                         column(
-                            width = 5,
+                            width = 3,
                             offset = 1,
                             selectInput(
                                 inputId = "SelectMonth",
@@ -79,12 +83,34 @@ ui <- dashboardPage(
                                                "June" = 6, "July" = 7, "August" = 8, "September" = 9,
                                                "October" = 10, "November" = 11, "December" = 12)
                             )
+                        ),
+                        column(
+                            width = 3,
+                            offset = 1,
+                            selectInput(
+                                inputId = "SelectCause",
+                                label = "Select a Cause",
+                                choices = c("Miscellaneous", "Lightning", "Debris Burning", "Campfire",
+                                            "Equipment Use", "Arson", "Children", "Railroad", "Smoking",
+                                            "Powerline", "Structure", "Fireworks", "Missing/Undefined")
+                            )
                         )
                     ),
                     
                     box(
                         width = 12,
                         htmlOutput(outputId = "GeoMap2")
+                    ),
+                    column(
+                        width = 12,
+                        box(
+                            width = 6,
+                            plotlyOutput(outputId = "LatHist")
+                        ),
+                        box(
+                            width = 6,
+                            plotlyOutput(outputId = "LongHist")
+                        )
                     )
                 )
             ),

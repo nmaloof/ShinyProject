@@ -4,3 +4,4 @@
 *.sql
 *.sqlite
 *.csv
+!TestVisas.csv
